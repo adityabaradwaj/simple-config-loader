@@ -3,7 +3,7 @@ use std::str::FromStr;
 use std::sync::OnceLock;
 
 use anyhow::Result;
-use config::FileFormat;
+use config::{Case, FileFormat};
 use serde::de::DeserializeOwned;
 use simple_encrypt::decrypt_file;
 
@@ -116,17 +116,18 @@ fn read_config_vars_from_all_sources(
         ).required(false));
 
     let mut env_source = if let Some(prefix) = prefix {
-        config::Environment::with_prefix(&prefix).prefix_separator("__")
+        config::Environment::with_prefix(&prefix).prefix_separator("__").convert_case(Case::Lower)
     } else {
-        config::Environment::default()
+        config::Environment::default().convert_case(Case::Lower)
     }
-    .separator("__")
-    .list_separator(",")
-    .try_parsing(true);
+    .separator("__");
     // We have to hardcode the list of config vars across the entire application
     // that must be parsed as Vec<String> rather than String
-    for key in list_parse_keys {
-        env_source = env_source.with_list_parse_key(&key);
+    if !list_parse_keys.is_empty() {
+        env_source = env_source.list_separator(",").try_parsing(true);
+        for key in list_parse_keys {
+            env_source = env_source.with_list_parse_key(&key);
+        }
     }
     // Add in settings from the environment (with a prefix of <prefix>)
     // Eg.. `AST__DEBUG=1 ./target/server` would set the `debug` key
