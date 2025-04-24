@@ -116,9 +116,11 @@ fn read_config_vars_from_all_sources(
         ).required(false));
 
     let mut env_source = if let Some(prefix) = prefix {
-        config::Environment::with_prefix(&prefix).prefix_separator("__").convert_case(Case::Lower)
+        config::Environment::with_prefix(&prefix).prefix_separator("__")
+        // .convert_case(Case::Lower)
     } else {
-        config::Environment::default().convert_case(Case::Lower)
+        config::Environment::default()
+        // .convert_case(Case::Lower)
     }
     .separator("__");
     // We have to hardcode the list of config vars across the entire application
