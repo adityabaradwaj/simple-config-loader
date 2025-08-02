@@ -72,15 +72,14 @@ fn read_config_vars_from_all_sources(
 
     let mut config_builder = config::Config::builder()
         // Start off by merging in the "default" configuration file
-        .add_source(config::File::new(
-            &format!("{config_dir}/default.yaml"),
-            FileFormat::Yaml,
-        ).required(false))
+        .add_source(
+            config::File::new(&format!("{config_dir}/default.yaml"), FileFormat::Yaml)
+                .required(false),
+        )
         // Add in the current environment file
-        .add_source(config::File::new(
-            &format!("{config_dir}/{env}"),
-            FileFormat::Yaml,
-        ).required(false))
+        .add_source(
+            config::File::new(&format!("{config_dir}/{env}"), FileFormat::Yaml).required(false),
+        )
         // Add in the secrets file for the current environment, which might be used as plaintext
         // during local development. This file shouldn't be checked in to git
         .add_source(
@@ -93,16 +92,16 @@ fn read_config_vars_from_all_sources(
 
     if let Some(ref key) = secrets_encryption_key_b64 {
         if let Ok(decrypted) = decrypt_file(&format!("{config_dir}/{env}-secrets.yaml.enc"), key) {
-            config_builder = config_builder.add_source(config::File::from_str(
-                &String::from_utf8(decrypted)?,
-                FileFormat::Yaml,
-            ).required(false));
+            config_builder = config_builder.add_source(
+                config::File::from_str(&String::from_utf8(decrypted)?, FileFormat::Yaml)
+                    .required(false),
+            );
         }
         if let Ok(decrypted) = decrypt_file(&format!("{config_dir}/local-secrets.yaml.enc"), key) {
-            config_builder = config_builder.add_source(config::File::from_str(
-                &String::from_utf8(decrypted)?,
-                FileFormat::Yaml,
-            ).required(false));
+            config_builder = config_builder.add_source(
+                config::File::from_str(&String::from_utf8(decrypted)?, FileFormat::Yaml)
+                    .required(false),
+            );
         }
     };
 
@@ -110,10 +109,10 @@ fn read_config_vars_from_all_sources(
         // Add in a local configuration file
         // This file shouldn't be checked in to git
         // Note that this file is _optional_
-        .add_source(config::File::new(
-            &format!("{config_dir}/local.yaml"),
-            FileFormat::Yaml,
-        ).required(false));
+        .add_source(
+            config::File::new(&format!("{config_dir}/local.yaml"), FileFormat::Yaml)
+                .required(false),
+        );
 
     let mut env_source = if let Some(prefix) = prefix {
         config::Environment::with_prefix(&prefix).prefix_separator("__")
